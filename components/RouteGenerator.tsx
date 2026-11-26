@@ -29,8 +29,8 @@ export default function RouteGenerator() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [mode, setMode] = useState<'inverse' | 'selective'>('inverse');
-  const [connectionType, setConnectionType] = useState<'dns_50' | 'ip_bat' | 'raw_url' | 'amnezia_guide'>('dns_50');
-  const [guideStep, setGuideStep] = useState<number>(1);
+  const [connectionType, setConnectionType] = useState<'dns_50' | 'ip_bat' | 'raw_url' | 'amnezia_guide' | 'vps_guide'>('dns_50');
+  const [activeGuideTab, setActiveGuideTab] = useState<'vps' | 'app' | 'keenetic_install' | 'keenetic_dns' | 'cli_asc' | 'policies'>('keenetic_install');
   const [copied, setCopied] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
@@ -71,610 +71,406 @@ export default function RouteGenerator() {
     }
   };
 
- const downloadFile = async (rawUrl: string, rawFilename: string) => {
-  const filename = rawFilename.split('/').pop() || rawFilename;
-  const cleanPath = `/data/${filename}`;
+  const downloadFile = async (rawUrl: string, rawFilename: string) => {
+    const filename = rawFilename.split('/').pop() || rawFilename;
+    const cleanPath = `/data/${filename}`;
 
-  try {
-    const response = await fetch(cleanPath);
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    try {
+      const response = await fetch(cleanPath);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      alert(`Ошибка скачивания файла ${filename}. Убедитесь, что файл сгенерирован на GitHub.`);
     }
-    const blob = await response.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(blobUrl);
-  } catch (err) {
-    alert(`Ошибка скачивания файла ${filename}. Убедитесь, что файл сгенерирован на GitHub.`);
-  }
-};
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#090a0f] flex items-center justify-center text-cyan-400 font-sans">
-        <div className="flex items-center gap-3 bg-black/60 border border-cyan-500/30 px-6 py-4 rounded-2xl shadow-[0_0_30px_rgba(6,182,212,0.2)]">
-          <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-          <span>Инициализация системы freenetdm...</span>
-        </div>
+      <div className="flex items-center justify-center min-h-[400px] text-cyan-400 font-mono text-sm">
+        [freenetdm] Загрузка конфигурационной базы и генератора...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#090a0f] text-gray-100 font-sans p-4 sm:p-8 space-y-8 selection:bg-fuchsia-500 selection:text-white">
-      {/* Container with Glassmorphism and Neon Border */}
-      <div className="max-w-6xl mx-auto space-y-8 bg-black/60 backdrop-blur-2xl p-6 sm:p-10 rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(168,85,247,0.12)]">
-        
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-8">
-          <div>
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-cyan-500/30 text-cyan-300 text-xs px-3.5 py-1 rounded-full font-mono uppercase tracking-widest mb-3">
-              <span>⚡ OFFICIAL HUB</span>
-              <span className="text-gray-500">•</span>
-              <span>v4.0 CLUB EDITION</span>
+    <div className="min-h-screen bg-[#090a0f] text-gray-100 font-sans p-4 sm:p-8 space-y-8 selection:bg-cyan-500 selection:text-black">
+      {/* Top Navigation / Header */}
+      <div className="max-w-6xl mx-auto backdrop-blur-2xl bg-black/60 border border-white/10 rounded-3xl p-6 shadow-[0_0_50px_rgba(6,182,212,0.1)] space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-6">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-indigo-400 bg-clip-text text-transparent uppercase tracking-wider">
+                ./freenetdm_
+              </span>
+              <span className="bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs sm:text-sm font-mono px-3 py-1 rounded-full uppercase tracking-widest">
+                Keenetic OS 5.x Ready
+              </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-indigo-400 tracking-tight">
-              freenetdm
-            </h1>
-            <p className="text-sm text-gray-400 mt-1 max-w-xl">
-              Интерактивный центр маршрутизации KeeneticOS & Netcraze. Управление AmneziaWG, Xray Reality и защищенными DoT/DoH DNS.
+            <p className="text-sm text-gray-300">
+              Портал полной настройки AmneziaWG / Xray и генератор списков выборочной маршрутизации для роутеров Keenetic & Netcraze
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 text-xs font-mono">
-            <div className="bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-              <span>База: {data?.metadata?.last_updated ? new Date(data.metadata.last_updated).toLocaleDateString('ru-RU') : 'Обновлено'}</span>
+          <div className="flex flex-wrap gap-2 text-sm font-mono">
+            <div className="bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 px-3.5 py-1.5 rounded-xl flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              База: {data?.metadata?.last_updated ? new Date(data.metadata.last_updated).toLocaleDateString('ru-RU') : '2026-11-26'}
             </div>
-            <div className="bg-fuchsia-950/40 border border-fuchsia-500/30 text-fuchsia-300 px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-[0_0_15px_rgba(217,70,239,0.15)]">
-              <span className="w-2 h-2 rounded-full bg-fuchsia-400"></span>
-              <span>Автообновление: 14 дней</span>
+            <div className="bg-cyan-950/60 text-cyan-400 border border-cyan-500/30 px-3.5 py-1.5 rounded-xl flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+              Автообновление: каждые 14 дней
             </div>
           </div>
         </div>
 
-        {/* Affiliate AdminVPS Banner */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-950/70 via-black to-fuchsia-950/60 p-6 border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.15)] group">
-          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-fuchsia-500/10 rounded-full blur-3xl group-hover:bg-cyan-500/20 transition-all duration-700"></div>
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="bg-cyan-500 text-black font-extrabold text-[11px] px-2.5 py-0.5 rounded-md uppercase tracking-wider">
-                  Рекомендуемый VPS
-                </span>
-                <span className="text-cyan-400 font-mono text-xs">AdminVPS (Нидерланды / Финляндия)</span>
-              </div>
-              <h3 className="text-lg font-bold text-white">
-                Аренда VPS под AmneziaWG & Xray Reality со скидкой 60%
-              </h3>
-              <p className="text-xs text-gray-300 max-w-2xl leading-relaxed">
-                Высокоскоростные KVM-серверы в Европе (1 Гбит/с, безлимитный трафик, оплата СБП и картами РФ). Используйте промокод <code className="bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-500/40 font-mono">OFF60</code> для максимальной выгоды.
-              </p>
+        {/* AdminVPS Affiliate Club Card */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-950/40 via-purple-950/40 to-black p-6 border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.15)] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center gap-2 text-cyan-400 text-base font-bold uppercase tracking-wider">
+              <span>⚡ Партнерский VPS-хостинг для своего VPN: AdminVPS</span>
+              <span className="bg-fuchsia-500/20 text-fuchsia-300 text-xs px-2.5 py-1 rounded border border-fuchsia-500/30 font-mono">Скидка -60%</span>
             </div>
-
-            <a
-              href="https://my.adminvps.ru/aff.php?aff=31526"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs px-6 py-3.5 rounded-xl transition duration-300 shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] shrink-0 uppercase tracking-wider"
-            >
-              <span>Заказать VPS со скидкой</span>
-              <span className="text-sm">➔</span>
-            </a>
+            <p className="text-sm text-gray-200 leading-relaxed">
+              Рекомендуемая локация: <strong>Нидерланды (Амстердам)</strong> или <strong>Финляндия (Хельсинки)</strong>. Безлимитный канал до 1 Гбит/с, полная совместимость с AmneziaWG/Xray, быстрая оплата картами РФ, СБП и криптовалютой.
+            </p>
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-mono text-gray-300 pt-1">
+              <span>Промокод на скидку 60%:</span>
+              <code className="bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/40 font-bold">OFF60</code>
+            </div>
           </div>
-        </div>
 
-        {/* Mode Selector */}
+          <a
+            href="https://my.adminvps.ru/aff.php?aff=31526"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full lg:w-auto text-center bg-gradient-to-r from-cyan-500 to-fuchsia-500 hover:from-cyan-400 hover:to-fuchsia-400 text-black font-black text-sm uppercase px-6 py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] shrink-0"
+          >
+            Заказать VPS со скидкой 60% ➔
+          </a>
+        </div>
+      </div>
+
+      {/* Main Section */}
+      <div className="max-w-6xl mx-auto backdrop-blur-2xl bg-black/60 border border-white/10 rounded-3xl p-6 sm:p-8 space-y-8 shadow-[0_0_50px_rgba(217,70,239,0.05)]">
+        {/* Step 1: Mode Selection */}
         <div className="space-y-4">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            Шаг 1. Выберите режим маршрутизации
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-extrabold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-300 font-mono">01</span>
+              Режим работы роутера Keenetic
+            </h2>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={() => setMode('inverse')}
-              className={`p-5 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden ${
+              className={`p-5 rounded-2xl text-left border transition-all relative overflow-hidden ${
                 mode === 'inverse'
-                  ? 'bg-gradient-to-br from-cyan-950/60 to-black border-cyan-400 shadow-[0_0_30px_rgba(6,182,212,0.25)] text-white'
-                  : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20 hover:text-gray-300'
+                  ? 'bg-gradient-to-br from-cyan-950/60 to-black border-cyan-500 text-white shadow-[0_0_30px_rgba(6,182,212,0.2)]'
+                  : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-bold text-base text-cyan-300">🔄 Инверсный режим</span>
-                <span className="text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono">
-                  ПО УМОЛЧАНИЮ
-                </span>
+                <span className="font-bold text-base text-cyan-300">🔄 Инверсный режим («Все кроме RU»)</span>
+                {mode === 'inverse' && <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_#06b6d4]"></span>}
               </div>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                Весь интернет-трафик идет через <strong>AmneziaWG / Xray</strong>. Сайты РФ (домены .RU, .РФ, Госуслуги, банки) направляются <strong>напрямую через провайдера (ISP)</strong>.
+              <p className="text-sm text-gray-200 leading-relaxed">
+                <strong>AmneziaWG</strong> устанавливается основным подключением по умолчанию (<code className="text-cyan-400">0.0.0.0/0</code>). Все сайты РФ (.RU/.РФ, Госуслуги, банки) перенаправляются <strong>напрямую через провайдера (ISP)</strong>.
               </p>
             </button>
 
             <button
               onClick={() => setMode('selective')}
-              className={`p-5 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden ${
+              className={`p-5 rounded-2xl text-left border transition-all relative overflow-hidden ${
                 mode === 'selective'
-                  ? 'bg-gradient-to-br from-fuchsia-950/60 to-black border-fuchsia-400 shadow-[0_0_30px_rgba(217,70,239,0.25)] text-white'
-                  : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20 hover:text-gray-300'
+                  ? 'bg-gradient-to-br from-fuchsia-950/60 to-black border-fuchsia-500 text-white shadow-[0_0_30px_rgba(217,70,239,0.2)]'
+                  : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-bold text-base text-fuchsia-300">🎯 Выборочный режим</span>
-                <span className="text-[10px] bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30 px-2 py-0.5 rounded-full font-mono">
-                  СЕЛЕКТИВНЫЙ
-                </span>
+                <span className="font-bold text-base text-fuchsia-300">🎯 Выборочный режим («Только списки»)</span>
+                {mode === 'selective' && <span className="w-2.5 h-2.5 rounded-full bg-fuchsia-400 shadow-[0_0_10px_#d946ef]"></span>}
               </div>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                Основной трафик идет через <strong>провайдера (ISP)</strong>. Только выбранные сервисы (YouTube, Discord, ChatGPT, Telegram) идут через <strong>AmneziaWG</strong>.
+              <p className="text-sm text-gray-200 leading-relaxed">
+                Основным подключением остается <strong>интернет-провайдер (ISP)</strong>. Через туннель AmneziaWG направляются только выбранные заблокированные сервисы (YouTube, Telegram, Discord, ChatGPT).
               </p>
             </button>
           </div>
         </div>
 
-        {/* Integration Type Navigation */}
+        {/* Step 2: Wizard Selector Tabs */}
         <div className="space-y-4">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400"></span>
-            Шаг 2. Выберите способ подключения или справочник
+          <h2 className="text-sm font-extrabold text-fuchsia-400 uppercase tracking-widest flex items-center gap-2">
+            <span className="w-6 h-6 rounded-lg bg-fuchsia-500/20 flex items-center justify-center text-fuchsia-300 font-mono">02</span>
+            Мастер выбора формата и инструкций
           </h2>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <button
               onClick={() => setConnectionType('dns_50')}
-              className={`p-4 rounded-xl border text-left text-xs font-medium transition duration-300 ${
+              className={`p-4 rounded-xl text-sm font-medium border text-left transition ${
                 connectionType === 'dns_50'
-                  ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]'
+                  ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-[0_0_20px_rgba(6,182,212,0.2)]'
                   : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20'
               }`}
             >
               <div className="font-bold text-cyan-300 mb-1">KeeneticOS 5.0+</div>
-              <div className="text-[11px] text-gray-400">DNS Домены (.txt по 300)</div>
+              <div className="text-xs text-gray-300">Домены .txt (по 300 шт)</div>
             </button>
 
             <button
               onClick={() => setConnectionType('ip_bat')}
-              className={`p-4 rounded-xl border text-left text-xs font-medium transition duration-300 ${
+              className={`p-4 rounded-xl text-sm font-medium border text-left transition ${
                 connectionType === 'ip_bat'
-                  ? 'bg-fuchsia-950/80 border-fuchsia-400 text-white shadow-[0_0_20px_rgba(217,70,239,0.3)]'
+                  ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-[0_0_20px_rgba(6,182,212,0.2)]'
                   : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20'
               }`}
             >
-              <div className="font-bold text-fuchsia-300 mb-1">KeeneticOS 4.x</div>
-              <div className="text-[11px] text-gray-400">IP Маршруты (.bat по 1024)</div>
+              <div className="font-bold text-cyan-300 mb-1">KeeneticOS 4.x</div>
+              <div className="text-xs text-gray-300">IP-маршруты .bat (1024)</div>
             </button>
 
             <button
               onClick={() => setConnectionType('raw_url')}
-              className={`p-4 rounded-xl border text-left text-xs font-medium transition duration-300 ${
+              className={`p-4 rounded-xl text-sm font-medium border text-left transition ${
                 connectionType === 'raw_url'
-                  ? 'bg-indigo-950/80 border-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.3)]'
+                  ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-[0_0_20px_rgba(6,182,212,0.2)]'
                   : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20'
               }`}
             >
-              <div className="font-bold text-indigo-300 mb-1">RAW HTTPS Ссылки</div>
-              <div className="text-[11px] text-gray-400">AdGuard Home / Entware</div>
+              <div className="font-bold text-cyan-300 mb-1">RAW HTTPS Ссылки</div>
+              <div className="text-xs text-gray-300">AdGuard / Entware / Neo</div>
             </button>
 
             <button
               onClick={() => setConnectionType('amnezia_guide')}
-              className={`p-4 rounded-xl border text-left text-xs font-medium transition duration-300 ${
+              className={`p-4 rounded-xl text-sm font-medium border text-left transition ${
                 connectionType === 'amnezia_guide'
-                  ? 'bg-amber-950/80 border-amber-400 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)]'
+                  ? 'bg-fuchsia-950/80 border-fuchsia-400 text-white shadow-[0_0_20px_rgba(217,70,239,0.2)]'
                   : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20'
               }`}
             >
-              <div className="font-bold text-amber-300 mb-1">📖 Инструкция Keenetic</div>
-              <div className="text-[11px] text-gray-400">AmneziaWG + DoT/DoH DNS</div>
+              <div className="font-bold text-fuchsia-300 mb-1">📖 Полное руководство</div>
+              <div className="text-xs text-gray-300">Настройка Keenetic с фото</div>
             </button>
           </div>
         </div>
 
-        {/* Illustrated Keenetic Setup Guide */}
+        {/* Step 3: Interactive Guide or Downloads */}
         {connectionType === 'amnezia_guide' ? (
-          <div className="bg-black/70 p-6 sm:p-8 rounded-3xl border border-amber-500/30 space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-              <div>
-                <h3 className="text-xl font-bold text-amber-400 flex items-center gap-2">
-                  <span>🛠️ Иллюстрированный мануал настройки Keenetic</span>
-                </h3>
-                <p className="text-xs text-gray-400 mt-1">
-                  Подробные шаги: от покупки VPS и создания AmneziaWG/Xray до настройки DoT/DoH DNS и ASC CLI команд.
-                </p>
-              </div>
-
-              {/* Step Navigation Tabs */}
-              <div className="flex flex-wrap gap-1.5 bg-black/60 p-1.5 rounded-xl border border-white/10">
-                {[1, 2, 3, 4, 5, 6].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setGuideStep(s)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono transition ${
-                      guideStep === s
-                        ? 'bg-amber-500 text-black font-bold shadow-[0_0_10px_rgba(245,158,11,0.5)]'
-                        : 'text-gray-400 hover:text-white'
-                    }`}
-                  >
-                    Шаг {s}
-                  </button>
-                ))}
-              </div>
+          <div className="space-y-6 bg-black/80 p-6 rounded-2xl border border-white/10">
+            {/* Guide Tabs */}
+            <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4 text-sm font-mono">
+              <button
+                onClick={() => setActiveGuideTab('vps')}
+                className={`px-4 py-2 rounded-lg border transition ${
+                  activeGuideTab === 'vps' ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300' : 'border-white/10 text-gray-400'
+                }`}
+              >
+                1. VPS AdminVPS
+              </button>
+              <button
+                onClick={() => setActiveGuideTab('app')}
+                className={`px-4 py-2 rounded-lg border transition ${
+                  activeGuideTab === 'app' ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300' : 'border-white/10 text-gray-400'
+                }`}
+              >
+                2. AmneziaVPN (IP + root)
+              </button>
+              <button
+                onClick={() => setActiveGuideTab('keenetic_install')}
+                className={`px-4 py-2 rounded-lg border transition ${
+                  activeGuideTab === 'keenetic_install' ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300' : 'border-white/10 text-gray-400'
+                }`}
+              >
+                3. Импорт .conf в Keenetic
+              </button>
+              <button
+                onClick={() => setActiveGuideTab('keenetic_dns')}
+                className={`px-4 py-2 rounded-lg border transition ${
+                  activeGuideTab === 'keenetic_dns' ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300' : 'border-white/10 text-gray-400'
+                }`}
+              >
+                4. Защита DNS и IPv6
+              </button>
+              <button
+                onClick={() => setActiveGuideTab('cli_asc')}
+                className={`px-4 py-2 rounded-lg border transition ${
+                  activeGuideTab === 'cli_asc' ? 'bg-fuchsia-500/20 border-fuchsia-400 text-fuchsia-300' : 'border-white/10 text-gray-400'
+                }`}
+              >
+                5. CLI Команды ASC
+              </button>
+              <button
+                onClick={() => setActiveGuideTab('policies')}
+                className={`px-4 py-2 rounded-lg border transition ${
+                  activeGuideTab === 'policies' ? 'bg-fuchsia-500/20 border-fuchsia-400 text-fuchsia-300' : 'border-white/10 text-gray-400'
+                }`}
+              >
+                6. Правила и Политики
+              </button>
             </div>
 
-            {/* Step 1: VPS & AmneziaVPN */}
-            {guideStep === 1 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-amber-500 text-black font-extrabold flex items-center justify-center text-sm">
-                    1
-                  </span>
-                  <div>
-                    <h4 className="text-base font-bold text-white">Аренда VPS на AdminVPS и авто-настройка AmneziaVPN</h4>
-                    <p className="text-xs text-gray-400">Подготовка сервера без использования командной строки</p>
-                  </div>
+            {/* Guide Body */}
+            {activeGuideTab === 'vps' && (
+              <div className="space-y-4 text-sm leading-relaxed text-gray-200">
+                <h3 className="text-sm font-bold text-cyan-300 flex items-center gap-2">
+                  <span>🖥️ Шаг 1. Аренда сервера на AdminVPS</span>
+                </h3>
+                <p>
+                  1. Перейдите по партнерской ссылке <a href="https://my.adminvps.ru/aff.php?aff=31526" target="_blank" rel="noreferrer" className="text-cyan-400 underline">my.adminvps.ru/aff.php?aff=31526</a>.<br />
+                  2. Выберите раздел <strong>VPS/VDS ➔ VPS в Нидерландах</strong> (Амстердам) или <strong>Финляндии</strong> (Хельсинки).<br />
+                  3. Тариф: <strong>Promo / Micro</strong> (KVM виртуализация, 1-2 vCPU, 2 ГБ RAM, NVMe диск).<br />
+                  4. Операционная система: выберите <strong>Ubuntu 22.04 LTS</strong>.<br />
+                  5. В поле промокода введите <code className="text-cyan-300 bg-cyan-950 px-1.5 py-0.5 rounded">OFF60</code> (скидка 60% на первый месяц).<br />
+                  6. Оплатите картой МИР/СБП. На почту придет письмо с <strong>IP-адресом сервера</strong> и паролем <code className="text-cyan-300 bg-cyan-950 px-1.5 py-0.5 rounded">root</code>.
+                </p>
+                {/* Visual Architecture Diagram */}
+                <div className="p-4 bg-black/90 rounded-xl border border-cyan-500/20 font-mono text-sm sm:text-sm text-cyan-400 space-y-1.5">
+                  <div>[Схема подключения]</div>
+                  <div>Устройство / ПК ➔ Keenetic (192.168.1.1) ➔ [Туннель AmneziaWG] ➔ AdminVPS (Нидерланды) ➔ Интернет</div>
                 </div>
+              </div>
+            )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3 text-xs text-gray-300 leading-relaxed bg-white/5 p-5 rounded-2xl border border-white/10">
-                    <p>
-                      <strong>1. Регистрация и выбор сервера:</strong> Перейдите по реферальной ссылке <a href="https://my.adminvps.ru/aff.php?aff=31526" target="_blank" rel="noreferrer" className="text-cyan-400 underline font-semibold">AdminVPS</a>. Закажите тариф KVM в Нидерландах или Финляндии (ОС Ubuntu 22.04 LTS). Для максимальной выгоды укажите промокод <code className="bg-cyan-950 text-cyan-300 px-1 py-0.5 rounded">OFF60</code>.
-                    </p>
-                    <p>
-                      <strong>2. Данные авторизации:</strong> После оплаты в письме и личном кабинете скопируйте <strong>IP-адрес сервера</strong> и пароль суперпользователя <code>root</code>.
-                    </p>
-                    <p>
-                      <strong>3. Автоматическая установка протокола:</strong> Скачайте приложение <a href="https://amnezia.org/" target="_blank" rel="noreferrer" className="text-cyan-400 underline">AmneziaVPN</a>. Нажмите <em>«У меня есть данные для подключения»</em> ➔ <em>«Настроить свой сервер»</em> ➔ введите IP и пароль <code>root</code>. Выберите протокол <strong>AmneziaWG</strong> или <strong>Xray Reality</strong>.
-                    </p>
-                    <p>
-                      <strong>4. Экспорт конфигурации:</strong> В приложении AmneziaVPN откройте настройки подключения ➔ <em>«Поделиться»</em> ➔ выберите <em>«Оригинальный формат AmneziaWG»</em> и сохраните файл <code>.conf</code> на ПК.
-                    </p>
+            {activeGuideTab === 'app' && (
+              <div className="space-y-4 text-sm leading-relaxed text-gray-200">
+                <h3 className="text-sm font-bold text-cyan-300">
+                  📱 Шаг 2. Авто-установка AmneziaVPN с телефона или ПК
+                </h3>
+                <p>
+                  1. Скачайте официальное приложение <strong>AmneziaVPN</strong> с сайта <a href="https://amnezia.org/" target="_blank" rel="noreferrer" className="text-cyan-400 underline">amnezia.org</a>.<br />
+                  2. Откройте приложение ➔ выберите <strong>«У меня есть данные для подключения»</strong> ➔ <strong>«Настроить свой сервер»</strong>.<br />
+                  3. Введите IP-адрес сервера из письма AdminVPS, имя пользователя <code className="text-cyan-300 bg-cyan-950 px-1.5 py-0.5 rounded">root</code> и ваш пароль.<br />
+                  4. В окне выбора протоколов выберите <strong>AmneziaWG</strong> (или Xray Reality). Нажмите «Установить».<br />
+                  5. Через 2 минуты после завершения установки нажмите <strong>«Поделиться»</strong> ➔ укажите имя <code className="text-cyan-300 bg-cyan-950 px-1.5 py-0.5 rounded">Keenetic</code> ➔ выберите протокол AmneziaWG ➔ выберите формат <strong>«Оригинальный формат AmneziaWG»</strong>.<br />
+                  6. Сохраните файл <code className="text-cyan-300 bg-cyan-950 px-1.5 py-0.5 rounded">.conf</code> на устройство.
+                </p>
+              </div>
+            )}
+
+            {activeGuideTab === 'keenetic_install' && (
+              <div className="space-y-4 text-sm leading-relaxed text-gray-200">
+                <h3 className="text-sm font-bold text-cyan-300">
+                  ⚙️ Шаг 3. Установка компонента WireGuard и импорт .conf в KeeneticOS
+                </h3>
+                <p>
+                  1. Зайдите в веб-интерфейс Keenetic (<code className="text-cyan-300 bg-cyan-950 px-1 py-0.5 rounded">192.168.1.1</code>).<br />
+                  2. Перейдите в раздел <strong>Управление ➔ Системные настройки ➔ Изменить набор компонентов</strong>.<br />
+                  3. Найдите в поиске и отметьте галочкой компонент <strong>WireGuard VPN</strong>. Нажмите «Обновить KeeneticOS».<br />
+                  4. После перезагрузки роутера зайдите в меню <strong>Сетевые правила (или Интернет) ➔ Другие подключения</strong>.<br />
+                  5. В блоке WireGuard нажмите <strong>«Загрузить из файла»</strong> (или «Импортировать из файла») и выберите сохраненный файл <code className="text-cyan-300 bg-cyan-950 px-1 py-0.5 rounded">.conf</code>.<br />
+                  6. Нажмите на значок карандаша рядом со созданным подключением: отметьте галочкой <strong>«Использовать для выхода в интернет»</strong> и нажмите «Сохранить».
+                </p>
+                {/* Visual UI Box Simulation */}
+                <div className="p-4 bg-gray-950 rounded-xl border border-gray-800 space-y-2 font-mono text-sm sm:text-sm">
+                  <div className="text-gray-400">// Настройки подключения Wireguard в KeeneticOS:</div>
+                  <div className="text-white">Название: <span className="text-cyan-400">amnezia_for_awg</span></div>
+                  <div className="text-emerald-400">☑ Использовать для выхода в интернет</div>
+                  <div className="text-gray-400">DNS 1: <span className="text-cyan-400">1.1.1.1</span> | DNS 2: <span className="text-cyan-400">8.8.8.8</span></div>
+                </div>
+              </div>
+            )}
+
+            {activeGuideTab === 'keenetic_dns' && (
+              <div className="space-y-4 text-sm leading-relaxed text-gray-200">
+                <h3 className="text-sm font-bold text-cyan-300">
+                  🛡️ Шаг 4. Настройка защищенных DNS и отключение IPv6 (Защита от утечек)
+                </h3>
+                <p>
+                  1. В боковом меню откройте <strong>Сетевые правила ➔ Интернет-фильтры ➔ вкладка Настройка DNS</strong>.<br />
+                  2. Нажмите «Добавить сервер», укажите адреса публичных DNS: <code className="text-cyan-300 bg-cyan-950 px-1 py-0.5 rounded">1.1.1.1</code> и <code className="text-cyan-300 bg-cyan-950 px-1 py-0.5 rounded">8.8.8.8</code> (тип DoT/DoH или стандартный).<br />
+                  3. Перейдите в раздел <strong>Интернет ➔ Кабель Ethernet (основное подключение)</strong>.<br />
+                  4. В параметрах IPv4 отметьте галочку <strong>«Игнорировать DNSv4 интернет-провайдера»</strong>.<br />
+                  5. В параметрах IPv6 выберите <strong>«Не используется»</strong> и нажмите «Сохранить».
+                </p>
+              </div>
+            )}
+
+            {activeGuideTab === 'cli_asc' && (
+              <div className="space-y-4 text-sm leading-relaxed text-gray-200">
+                <h3 className="text-sm font-bold text-fuchsia-300">
+                  ⌨️ Шаг 5. Применение специфических параметров AmneziaWG (ASC) через CLI
+                </h3>
+                <p className="leading-relaxed">
+                  Для версий KeeneticOS 4.x/5.0 со старыми шаблонами маскировки AmneziaWG 1.0 требуется применить параметры <code className="text-fuchsia-300">Jc, Jmin, Jmax, S1, S2, H1, H2, H3, H4</code> из файла <code className="text-fuchsia-300">.conf</code>:
+                </p>
+                <div className="bg-black p-4 rounded-xl border border-fuchsia-500/30 font-mono text-sm sm:text-sm space-y-2 text-fuchsia-300">
+                  <div>1. Нажмите на значок шестеренки в правом верхнем углу ➔ «Командная строка».</div>
+                  <div>2. Введите команду: <code className="text-white">show interface</code> ➔ нажмите «Отправить запрос».</div>
+                  <div>3. Найдите имя вашего туннеля (например, <code className="text-cyan-300">Wireguard0</code>).</div>
+                  <div>4. Сформируйте и отправьте команду:</div>
+                  <div className="text-emerald-400 bg-gray-900 p-2 rounded border border-gray-800">
+                    interface Wireguard0 wireguard asc 3 10 50 68 90 1627566968 1895378186 86288281 465920850
                   </div>
-
-                  {/* UI Diagram Illustration */}
-                  <div className="bg-black/90 p-5 rounded-2xl border border-cyan-500/30 flex flex-col justify-between font-mono text-[11px] space-y-4">
-                    <div className="text-cyan-400 font-bold flex items-center justify-between border-b border-cyan-500/20 pb-2">
-                      <span>СХЕМА АВТО-НАСТРОЙКИ VIRTUAL SERVER</span>
-                      <span className="text-[9px] bg-cyan-950 px-2 py-0.5 rounded border border-cyan-500/40">Amnezia Engine</span>
-                    </div>
-
-                    <div className="space-y-2 text-gray-300">
-                      <div className="p-2 bg-gray-900 rounded border border-gray-800 flex justify-between">
-                        <span>Хостинг:</span>
-                        <span className="text-white">AdminVPS (Нидерланды)</span>
-                      </div>
-                      <div className="p-2 bg-gray-900 rounded border border-gray-800 flex justify-between">
-                        <span>Авторизация:</span>
-                        <span className="text-emerald-400">IP + root password</span>
-                      </div>
-                      <div className="p-2 bg-gray-900 rounded border border-gray-800 flex justify-between">
-                        <span>Протоколы:</span>
-                        <span className="text-fuchsia-400">AmneziaWG / Xray Reality</span>
-                      </div>
-                      <div className="p-2 bg-gray-900 rounded border border-gray-800 flex justify-between">
-                        <span>Результат:</span>
-                        <span className="text-cyan-300">файл connection.conf</span>
-                      </div>
-                    </div>
-
-                    <div className="p-3 bg-cyan-950/40 rounded border border-cyan-500/30 text-center text-cyan-300 font-sans text-xs">
-                      ⚡ Готовый файл .conf готов для импорта в роутер Keenetic
-                    </div>
+                  <div>5. Сохраните конфигурацию роутера командой:</div>
+                  <div className="text-emerald-400 bg-gray-900 p-2 rounded border border-gray-800">
+                    system configuration save
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Step 2: Keenetic Component Setup */}
-            {guideStep === 2 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-amber-500 text-black font-extrabold flex items-center justify-center text-sm">
-                    2
-                  </span>
-                  <div>
-                    <h4 className="text-base font-bold text-white">Установка системного компонента WireGuard VPN</h4>
-                    <p className="text-xs text-gray-400">Активация встроенного модуля подписки в KeeneticOS</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3 text-xs text-gray-300 leading-relaxed bg-white/5 p-5 rounded-2xl border border-white/10">
-                    <p>
-                      1. Откройте браузер и перейдите в веб-интерфейс Keenetic по адресу <code>192.168.1.1</code> (или <code>my.keenetic.net</code>).
-                    </p>
-                    <p>
-                      2. Зайдите в меню <strong>Управление</strong> ➔ <strong>Системные настройки</strong>.
-                    </p>
-                    <p>
-                      3. В секции <em>«Обновление и компоненты»</em> нажмите кнопку <strong>«Изменить набор компонентов»</strong>.
-                    </p>
-                    <p>
-                      4. Найдите в поиске элемент <strong>WireGuard VPN</strong> (и при необходимости <em>Протокол IPv6</em>) и отметьте галочкой.
-                    </p>
-                    <p>
-                      5. Нажмите <strong>Сохранить изменения</strong> и дождитесь автоматической перезагрузки роутера.
-                    </p>
-                  </div>
-
-                  {/* UI Illustration Card */}
-                  <div className="bg-black/90 p-5 rounded-2xl border border-fuchsia-500/30 font-mono text-[11px] space-y-3">
-                    <div className="text-fuchsia-400 font-bold border-b border-fuchsia-500/20 pb-2">
-                      🖥️ ВЕБ-ИНТЕРФЕЙС KEENETICOS (192.168.1.1)
-                    </div>
-                    <div className="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
-                      <div className="text-gray-400">[Управление] ➔ [Системные настройки]</div>
-                      <div className="p-2 bg-fuchsia-950/40 border border-fuchsia-500/40 rounded text-fuchsia-300 flex items-center justify-between">
-                        <span>[✓] WireGuard VPN</span>
-                        <span className="text-[9px] bg-fuchsia-500 text-black px-1.5 font-bold rounded">УСТАНОВЛЕНО</span>
-                      </div>
-                      <div className="text-[10px] text-gray-400 italic">
-                        * Рекомендуется версия KeeneticOS 5.0 или новее.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Import Config & Connection Interface */}
-            {guideStep === 3 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-amber-500 text-black font-extrabold flex items-center justify-center text-sm">
-                    3
-                  </span>
-                  <div>
-                    <h4 className="text-base font-bold text-white">Импорт файла .conf и включение туннеля</h4>
-                    <p className="text-xs text-gray-400">Создание интерфейса AmneziaWG в «Других подключениях»</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3 text-xs text-gray-300 leading-relaxed bg-white/5 p-5 rounded-2xl border border-white/10">
-                    <p>
-                      1. Перейдите в раздел <strong>Сетевые правила</strong> (или <em>Интернет</em>) ➔ <strong>Другие подключения</strong>.
-                    </p>
-                    <p>
-                      2. В секции <em>WireGuard</em> нажмите кнопку <strong>«Загрузить из файла»</strong> и выберите сохраненный `.conf` файл.
-                    </p>
-                    <p>
-                      3. Нажмите значок редактирования (карандаш) созданного подключения:
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1 text-gray-300">
-                      <li>Поставьте галочку <strong>«Использовать для выхода в интернет»</strong>.</li>
-                      <li>Укажите публичные DNS-серверы: <code>1.1.1.1</code>, <code>8.8.8.8</code>.</li>
-                      <li>Проверьте наличие адреса сервера и ключей шифрования.</li>
-                    </ul>
-                    <p>
-                      4. Нажмите <strong>Сохранить</strong> и активируйте переключатель включения подключения.
-                    </p>
-                  </div>
-
-                  {/* UI Illustration */}
-                  <div className="bg-black/90 p-5 rounded-2xl border border-emerald-500/30 font-mono text-[11px] space-y-3">
-                    <div className="text-emerald-400 font-bold border-b border-emerald-500/20 pb-2">
-                      🌐 ДРУГИЕ ПОДКЛЮЧЕНИЯ ➔ WIREGUARD
-                    </div>
-                    <div className="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
-                      <div className="flex items-center justify-between text-white font-bold">
-                        <span>AmneziaWG_Interface</span>
-                        <span className="text-emerald-400 animate-pulse">● ПОДКЛЮЧЕНО</span>
-                      </div>
-                      <div className="text-[10px] text-gray-400">
-                        [✓] Использовать для выхода в интернет
-                      </div>
-                      <div className="text-[10px] text-cyan-300">
-                        DNS: 1.1.1.1, 8.8.8.8
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Encrypted DNS (DoT / DoH) & Leak Protection */}
-            {guideStep === 4 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-amber-500 text-black font-extrabold flex items-center justify-center text-sm">
-                    4
-                  </span>
-                  <div>
-                    <h4 className="text-base font-bold text-white">Настройка шифрованного DNS (DoT / DoH) и защита от утечек</h4>
-                    <p className="text-xs text-gray-400">Предотвращение перехвата DNS-запросов и отключение IPv6</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3 text-xs text-gray-300 leading-relaxed bg-white/5 p-5 rounded-2xl border border-white/10">
-                    <p>
-                      <strong>1. Настройка DNS-over-TLS (DoT) / DNS-over-HTTPS (DoH):</strong><br />
-                      Перейдите в <strong>Сетевые правила</strong> ➔ <strong>Интернет-фильтры</strong> ➔ вкладка <strong>Настройка DNS</strong>.<br />
-                      Нажмите <em>«Добавить сервер»</em> и введите шифрованные адреса:
-                    </p>
-                    <ul className="list-disc pl-5 font-mono text-[11px] space-y-1 text-cyan-300">
-                      <li><code>tls://1.1.1.1@one.one.one.one</code> (Cloudflare DoT)</li>
-                      <li><code>tls://dns.google@dns.google</code> (Google DoT)</li>
-                      <li><code>https://dns.cloudflare.com/dns-query</code> (Cloudflare DoH)</li>
-                    </ul>
-                    <p>
-                      <strong>2. Отключение DNS провайдера:</strong> В настройках основного подключения (Ethernet / ISP) активируйте галочку <em>«Игнорировать DNSv4 интернет-провайдера»</em>.
-                    </p>
-                    <p>
-                      <strong>3. Отключение IPv6:</strong> В настройках подключений переведите IPv6 в положение <em>«Не используется»</em>, чтобы исключить утечки трафика мимо VPN.
-                    </p>
-                  </div>
-
-                  {/* UI Illustration */}
-                  <div className="bg-black/90 p-5 rounded-2xl border border-cyan-500/30 font-mono text-[11px] space-y-3">
-                    <div className="text-cyan-400 font-bold border-b border-cyan-500/20 pb-2">
-                      🔒 ИНТЕРНЕТ-ФИЛЬТРЫ ➔ НАСТРОЙКА DNS (DoT / DoH)
-                    </div>
-                    <div className="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
-                      <div className="p-2 bg-cyan-950/40 border border-cyan-500/30 rounded text-cyan-200">
-                        DoT: tls://1.1.1.1@one.one.one.one
-                      </div>
-                      <div className="p-2 bg-cyan-950/40 border border-cyan-500/30 rounded text-cyan-200">
-                        DoT: tls://dns.google@dns.google
-                      </div>
-                      <div className="p-2 bg-emerald-950/40 border border-emerald-500/30 rounded text-emerald-300">
-                        [✓] Игнорировать DNSv4 провайдера
-                      </div>
-                      <div className="p-2 bg-red-950/40 border border-red-500/30 rounded text-red-300">
-                        [X] IPv6: Не используется
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 5: AmneziaWG CLI ASC Parameters */}
-            {guideStep === 5 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-amber-500 text-black font-extrabold flex items-center justify-center text-sm">
-                    5
-                  </span>
-                  <div>
-                    <h4 className="text-base font-bold text-white">Ввод маскирующих CLI-параметров AmneziaWG (ASC)</h4>
-                    <p className="text-xs text-gray-400">Обход блокировок протокола WireGuard на уровне DPI</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3 text-xs text-gray-300 leading-relaxed bg-white/5 p-5 rounded-2xl border border-white/10">
-                    <p>
-                      Если в вашем `.conf` файле AmneziaWG присутствуют параметры зашумления (<code>Jc</code>, <code>Jmin</code>, <code>Jmax</code>, <code>S1</code>, <code>S2</code>, <code>H1</code>-<code>H4</code>), их необходимо применить через CLI Keenetic:
-                    </p>
-                    <p>
-                      1. Нажмите на иконку шестеренки ➔ <strong>Командная строка</strong> (или подключитесь по SSH).
-                    </p>
-                    <p>
-                      2. Выполните команду: <code className="bg-black text-cyan-300 px-1 py-0.5 rounded font-mono">show interface</code> и найдите системное имя туннеля (например, <code>Wireguard0</code>).
-                    </p>
-                    <p>
-                      3. Введите команду маскировки ASC в формате:
-                    </p>
-                    <pre className="bg-black p-2 rounded text-[10px] text-emerald-400 font-mono overflow-x-auto border border-gray-800">
-interface Wireguard0 wireguard asc &lt;Jc&gt; &lt;Jmin&gt; &lt;Jmax&gt; &lt;S1&gt; &lt;S2&gt; &lt;H1&gt; &lt;H2&gt; &lt;H3&gt; &lt;H4&gt;
-                    </pre>
-                    <p>
-                      4. Сохраните конфигурацию роутера командой: <code className="bg-black text-cyan-300 px-1 py-0.5 rounded font-mono">system configuration save</code>.
-                    </p>
-                  </div>
-
-                  {/* UI Illustration */}
-                  <div className="bg-black/90 p-5 rounded-2xl border border-fuchsia-500/30 font-mono text-[11px] space-y-3">
-                    <div className="text-fuchsia-400 font-bold border-b border-fuchsia-500/20 pb-2">
-                      💻 KEENETIC CLI TERMINAL
-                    </div>
-                    <div className="bg-gray-950 p-3 rounded border border-gray-800 space-y-1.5 text-[10px] text-gray-300">
-                      <div>(config)&gt; <span className="text-white">show interface Wireguard0</span></div>
-                      <div className="text-gray-500">... interface status: UP</div>
-                      <div>(config)&gt; <span className="text-cyan-300">interface Wireguard0 wireguard asc 4 10 50 15 25 1 2 3 4</span></div>
-                      <div className="text-emerald-400">NetworkASC: applied parameters successfully</div>
-                      <div>(config)&gt; <span className="text-white">system configuration save</span></div>
-                      <div className="text-gray-400">Core::Configuration: saved to flash memory.</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 6: Route Policies & Domain Lists */}
-            {guideStep === 6 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-full bg-amber-500 text-black font-extrabold flex items-center justify-center text-sm">
-                    6
-                  </span>
-                  <div>
-                    <h4 className="text-base font-bold text-white">Приоритеты подключений и привязка маршрутов DNS</h4>
-                    <p className="text-xs text-gray-400">Завершающая настройка правил разделения трафика</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3 text-xs text-gray-300 leading-relaxed bg-white/5 p-5 rounded-2xl border border-white/10">
-                    <p>
-                      <strong>1. Для инверсного режима («Всё через VPN, кроме RU»):</strong><br />
-                      Перейдите в <strong>Сетевые правила</strong> ➔ <strong>Приоритеты подключений</strong>. В «Политике по умолчанию» перетащите подключение AmneziaWG на самую верхнюю позицию (выше провайдера).
-                    </p>
-                    <p>
-                      <strong>2. Загрузка доменных списков:</strong><br />
-                      Зайдите в <strong>Сетевые правила</strong> ➔ <strong>Маршрутизация</strong> ➔ вкладка <strong>Доменные имена</strong>.<br />
-                      Нажмите <em>«Добавить список»</em>, укажите название (например, <code>RU Direct</code>). В поле <em>«Интерфейс»</em> выберите <strong>Основное подключение (ISP)</strong> и вставьте скачанные с freenetdm файлы <code>.txt</code> (по 300 доменов).
-                    </p>
-                    <p>
-                      <strong>3. Для выборочного режима:</strong> В «Политике по умолчанию» первым остается провайдер, а списки заблокированных сайтов привязываются к интерфейсу <strong>AmneziaWG</strong>.
-                    </p>
-                  </div>
-
-                  {/* UI Illustration */}
-                  <div className="bg-black/90 p-5 rounded-2xl border border-amber-500/30 font-mono text-[11px] space-y-3">
-                    <div className="text-amber-400 font-bold border-b border-amber-500/20 pb-2">
-                      🔀 МАРШРУТИЗАЦИЯ ➔ ДОМЕННЫЕ ИМЕНА
-                    </div>
-                    <div className="bg-gray-900 p-3 rounded border border-gray-800 space-y-2">
-                      <div className="p-2 bg-gray-800 rounded flex justify-between">
-                        <span>Список: RU_Direct_Part1</span>
-                        <span className="text-cyan-300">Выход ➔ ISP (Провайдер)</span>
-                      </div>
-                      <div className="p-2 bg-gray-800 rounded flex justify-between">
-                        <span>Список: RU_Direct_Part2</span>
-                        <span className="text-cyan-300">Выход ➔ ISP (Провайдер)</span>
-                      </div>
-                      <div className="p-2 bg-amber-950/40 border border-amber-500/30 rounded text-amber-300 text-[10px]">
-                        ⚡ Все прочие домены автоматически идут через AmneziaWG туннель!
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            {activeGuideTab === 'policies' && (
+              <div className="space-y-4 text-sm leading-relaxed text-gray-200">
+                <h3 className="text-sm font-bold text-fuchsia-300">
+                  🔀 Шаг 6. Настройка правил и приоритетов подключений в KeeneticOS
+                </h3>
+                <p>
+                  1. <strong>Инверсный режим («Все кроме RU»):</strong> Зайдите в <strong>Интернет ➔ Приоритеты подключений</strong>. В «Политике по умолчанию» перетащите подключение AmneziaWG <strong>выше</strong> подключения провайдера.<br />
+                  2. Зайдите в <strong>Сетевые правила ➔ Маршрутизация ➔ вкладка Маршруты DNS</strong>.<br />
+                  3. Нажмите «Добавить список», скопируйте домены `.ru`/`.рф` из нарезанного файла <code className="text-cyan-300 bg-cyan-950 px-1 py-0.5 rounded">.txt</code> (до 300 штук) и сохраните.<br />
+                  4. В секции «Правила маршрутизации» нажмите «Добавить», выберите список доменов и в поле «Интерфейс» укажите <strong>Основное подключение (провайдер ISP)</strong>.<br />
+                  5. <strong>Выборочный режим:</strong> Поставьте провайдера первым в приоритетах, а списки заблокированных сервисов направьте на интерфейс <strong>AmneziaWG</strong>.
+                </p>
               </div>
             )}
           </div>
         ) : connectionType === 'raw_url' ? (
-          <div className="bg-black/70 p-6 rounded-3xl border border-indigo-500/30 space-y-4">
-            <h3 className="font-bold text-sm text-indigo-300">
-              🔗 Прямые RAW HTTPS-ссылки (Для AdGuard Home / NextDNS / Entware / HydraRoute):
+          <div className="bg-black/80 p-6 rounded-2xl border border-white/10 space-y-4">
+            <h3 className="font-bold text-base text-cyan-300">
+              🔗 Прямые RAW HTTPS-ссылки (Для автообновления в AdGuard Home / Entware / NextDNS):
             </h3>
-
-            <div className="space-y-3 font-mono text-xs">
-              <div className="bg-black p-4 rounded-xl border border-white/10 flex items-center justify-between gap-3">
+            <div className="space-y-3 font-mono text-sm">
+              <div className="bg-gray-950 p-3 rounded-xl border border-gray-800 flex items-center justify-between gap-4">
                 <span className="truncate text-cyan-400">/data/routes.json</span>
                 <button
-                  onClick={() => copyToClipboard('/data/routes.json', 'json_raw')}
-                  className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-white font-sans transition shrink-0"
+                  onClick={() => copyToClipboard('/data/routes.json', 'raw_json')}
+                  className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 px-3 py-1.5 rounded-lg border border-cyan-500/30 transition shrink-0"
                 >
-                  {copiedUrl === 'json_raw' ? '✓ Скопировано' : '📋 Скопировать RAW'}
+                  {copiedUrl === 'raw_json' ? '✓ Скопировано' : '📋 Скопировать URL'}
                 </button>
               </div>
 
-              <div className="bg-black p-4 rounded-xl border border-white/10 flex items-center justify-between gap-3">
+              <div className="bg-gray-950 p-3 rounded-xl border border-gray-800 flex items-center justify-between gap-4">
                 <span className="truncate text-emerald-400">/data/ru_direct_domains_part1.txt</span>
                 <button
-                  onClick={() => copyToClipboard('/data/ru_direct_domains_part1.txt', 'txt_raw')}
-                  className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-white font-sans transition shrink-0"
+                  onClick={() => copyToClipboard('/data/ru_direct_domains_part1.txt', 'raw_txt')}
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-lg border border-emerald-500/30 transition shrink-0"
                 >
-                  {copiedUrl === 'txt_raw' ? '✓ Скопировано' : '📋 Скопировать RAW'}
+                  {copiedUrl === 'raw_txt' ? '✓ Скопировано' : '📋 Скопировать URL'}
                 </button>
               </div>
             </div>
           </div>
         ) : (
-          <div className="bg-black/70 p-6 rounded-3xl border border-white/10 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
-              <h3 className="font-bold text-sm text-white">
-                📥 Скачивание файлов ({connectionType === 'dns_50' ? 'Домены KeeneticOS 5.0+' : 'IP-маршруты KeeneticOS 4.x'}):
+          <div className="bg-black/80 p-6 rounded-2xl border border-white/10 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
+              <h3 className="font-bold text-base text-cyan-300">
+                📥 Нарезанные файлы конфигурации ({connectionType === 'dns_50' ? 'Домены .txt по 300 шт' : 'IP-маршруты .bat по 1024 шт'}):
               </h3>
-              <span className="text-xs text-gray-400 font-mono">
-                Записей: {mode === 'inverse' ? filteredRuDomains.length : filteredVpnDomains.length}
+              <span className="text-sm text-gray-300 font-mono">
+                Записей в предпросмотре: {mode === 'inverse' ? filteredRuDomains.length : filteredVpnDomains.length}
               </span>
             </div>
 
@@ -685,10 +481,10 @@ interface Wireguard0 wireguard asc &lt;Jc&gt; &lt;Jmin&gt; &lt;Jmax&gt; &lt;S1&g
                     <button
                       key={file}
                       onClick={() => downloadFile(`/data/${file}`, file)}
-                      className="bg-white/5 hover:bg-white/10 text-white text-xs p-4 rounded-xl border border-white/10 flex items-center justify-between transition group"
+                      className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-5 py-3.5 rounded-xl border border-gray-700 flex items-center justify-between transition shadow-md"
                     >
-                      <span className="font-medium">RU DNS Список #{idx + 1} (300)</span>
-                      <span className="text-cyan-400 font-mono group-hover:scale-110 transition">.txt</span>
+                      <span>RU Список #{idx + 1} (300)</span>
+                      <span className="text-cyan-400 font-mono">.txt</span>
                     </button>
                   ))
                 ) : (
@@ -696,10 +492,10 @@ interface Wireguard0 wireguard asc &lt;Jc&gt; &lt;Jmin&gt; &lt;Jmax&gt; &lt;S1&g
                     <button
                       key={file}
                       onClick={() => downloadFile(`/data/${file}`, file)}
-                      className="bg-white/5 hover:bg-white/10 text-white text-xs p-4 rounded-xl border border-white/10 flex items-center justify-between transition group"
+                      className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-5 py-3.5 rounded-xl border border-gray-700 flex items-center justify-between transition shadow-md"
                     >
-                      <span className="font-medium">VPN DNS Список #{idx + 1} (300)</span>
-                      <span className="text-fuchsia-400 font-mono group-hover:scale-110 transition">.txt</span>
+                      <span>VPN Список #{idx + 1} (300)</span>
+                      <span className="text-cyan-400 font-mono">.txt</span>
                     </button>
                   ))
                 )
@@ -708,10 +504,10 @@ interface Wireguard0 wireguard asc &lt;Jc&gt; &lt;Jmin&gt; &lt;Jmax&gt; &lt;S1&g
                   <button
                     key={file}
                     onClick={() => downloadFile(`/data/${file}`, file)}
-                    className="bg-white/5 hover:bg-white/10 text-white text-xs p-4 rounded-xl border border-white/10 flex items-center justify-between transition group"
+                    className="bg-gray-900 hover:bg-gray-800 text-white text-sm px-5 py-3.5 rounded-xl border border-gray-700 flex items-center justify-between transition shadow-md"
                   >
-                    <span className="font-medium">IP Маршруты #{idx + 1} (1024)</span>
-                    <span className="text-emerald-400 font-mono group-hover:scale-110 transition">.bat</span>
+                    <span>IP Маршруты #{idx + 1} (1024)</span>
+                    <span className="text-emerald-400 font-mono">.bat</span>
                   </button>
                 ))
               )}
@@ -725,9 +521,9 @@ interface Wireguard0 wireguard asc &lt;Jc&gt; &lt;Jmin&gt; &lt;Jmax&gt; &lt;S1&g
                     'share_url'
                   )
                 }
-                className="text-xs text-gray-400 hover:text-cyan-300 transition flex items-center gap-1.5"
+                className="text-sm text-gray-300 hover:text-white transition flex items-center gap-1 font-mono"
               >
-                <span>🔗 {copiedUrl === 'share_url' ? 'Ссылка скопирована!' : 'Поделиться ссылкой на выбор'}</span>
+                <span>🔗 {copiedUrl === 'share_url' ? 'Ссылка скопирована в буфер!' : 'Поделиться ссылкой на набор'}</span>
               </button>
 
               <button
@@ -736,31 +532,30 @@ interface Wireguard0 wireguard asc &lt;Jc&gt; &lt;Jmin&gt; &lt;Jmax&gt; &lt;S1&g
                     (mode === 'inverse' ? filteredRuDomains : filteredVpnDomains).join('\n')
                   )
                 }
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-bold text-xs px-5 py-2.5 rounded-xl transition shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+                className="bg-gradient-to-r from-cyan-500 to-fuchsia-500 hover:from-cyan-400 hover:to-fuchsia-400 text-black text-sm px-6 py-3 rounded-xl font-bold uppercase transition shadow-lg"
               >
-                {copied ? '✓ Скопировано!' : '📋 Скопировать весь список'}
+                {copied ? '✓ Скопировано!' : '📋 Скопировать полный список'}
               </button>
             </div>
           </div>
         )}
 
-        {/* Live Search & Terminal Preview */}
+        {/* Live Preview Console */}
         {connectionType !== 'amnezia_guide' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                Предпросмотр базы ({mode === 'inverse' ? 'Прямой доступ ISP' : 'Туннель AmneziaWG'})
+              <h4 className="text-sm font-bold text-gray-300 uppercase tracking-widest font-mono">
+                Терминал предпросмотра ({mode === 'inverse' ? 'Прямой доступ ISP' : 'Туннель AmneziaWG'})
               </h4>
               <input
                 type="text"
-                placeholder="Фильтр записей..."
+                placeholder="Быстрый фильтр..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="bg-black/60 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition"
+                className="bg-black border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500 transition-colors font-mono"
               />
             </div>
-
-            <div className="bg-black p-5 rounded-2xl border border-white/10 h-56 overflow-y-auto font-mono text-xs text-gray-300 space-y-1 selection:bg-cyan-500 selection:text-black">
+            <div className="bg-black p-4 rounded-2xl border border-white/10 h-52 overflow-y-auto font-mono text-sm text-gray-300 space-y-1 shadow-inner">
               {(mode === 'inverse' ? filteredRuDomains : filteredVpnDomains).map((domain, i) => (
                 <div key={i} className="hover:text-cyan-300 transition-colors">
                   {domain}
@@ -769,7 +564,6 @@ interface Wireguard0 wireguard asc &lt;Jc&gt; &lt;Jmin&gt; &lt;Jmax&gt; &lt;S1&g
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

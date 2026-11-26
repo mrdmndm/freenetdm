@@ -71,11 +71,14 @@ export default function RouteGenerator() {
     }
   };
 
- const downloadFile = async (url: string, filename: string) => {
+ const downloadFile = async (rawUrl: string, rawFilename: string) => {
+  const filename = rawFilename.split('/').pop() || rawFilename;
+  const cleanPath = `/data/${filename}`;
+
   try {
-    const response = await fetch(url);
+    const response = await fetch(cleanPath);
     if (!response.ok) {
-      throw new Error(`Файл не найден (${response.status})`);
+      throw new Error(`HTTP ${response.status}`);
     }
     const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);

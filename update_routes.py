@@ -196,14 +196,14 @@ def main():
         "ru_direct": {
             "description": "Domains routed directly through ISP (RU websites, banks, state portals)",
             "domains_sample": sorted_ru_domains[:100],
-            "files": [f"public/data/{f}" for f in domain_files if "ru_direct" in f]
+            "files": [f"{f}" for f in domain_files if "ru_direct" in f]
         },
         "vpn_tunnel": {
             "description": "Domains and IPs routed through AmneziaWG VPN interface",
             "domains_sample": sorted_vpn_domains[:100],
             "ip_ranges_sample": sorted_vpn_ips[:100],
-            "domain_files": [f"public/data/{f}" for f in domain_files if "vpn_tunnel" in f],
-            "bat_files": [f"public/data/{f}" for f in bat_files]
+            "domain_files": [f"{f}" for f in domain_files if "vpn_tunnel" in f],
+            "bat_files": [f"{f}" for f in bat_files]
         }
     }
 

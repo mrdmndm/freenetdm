@@ -1,0 +1,15 @@
+# KeeneticOS Domain Name Rules - VPN Tunnel Part 1/1
+# Updated: 2026-11-26 16:22 UTC
+
+cdninstagram.com
+chatgpt.com
+discord.com
+discordapp.com
+googlevideo.com
+instagram.com
+ntc.party
+openai.com
+t.me
+telegram.org
+youtube.com
+ytimg.com

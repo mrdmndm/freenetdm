@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "last_updated": "2026-11-26T16:22:28.067808+00:00",
-    "next_update": "2026-12-10T16:22:28.067808+00:00",
+    "last_updated": "2026-11-27T17:06:02.410579+00:00",
+    "next_update": "2026-12-11T17:06:02.410579+00:00",
     "update_interval_days": 14,
     "version": "1.0.0",
     "generator": "Keenetic Route Generator Pipeline"
@@ -9,10 +9,10 @@
   "statistics": {
     "total_ru_direct_domains": 67,
     "total_vpn_tunnel_domains": 12,
-    "total_vpn_ip_ranges": 16634,
+    "total_vpn_ip_ranges": 14614,
     "ru_domain_chunks_count": 1,
     "vpn_domain_chunks_count": 1,
-    "ip_bat_chunks_count": 17
+    "ip_bat_chunks_count": 15
   },
   "ru_direct": {
     "description": "Domains routed directly through ISP (RU websites, banks, state portals)",
@@ -86,7 +86,7 @@
       "zapishu.me"
     ],
     "files": [
-      "public/data/ru_direct_domains_part1.txt"
+      "ru_direct_domains_part1.txt"
     ]
   },
   "vpn_tunnel": {
@@ -107,11 +107,10 @@
     ],
     "ip_ranges_sample": [
       "1.1.1.1/32",
-      "1.138.3.0/24",
       "1.179.201.0/24",
       "1.2.3.0/24",
       "1.37.93.0/24",
-      "1.78.218.0/24",
+      "100.1.1.0/24",
       "100.20.71.0/24",
       "100.22.51.0/24",
       "100.23.181.0/24",
@@ -120,16 +119,15 @@
       "100.24.168.106/32",
       "100.24.208.0/24",
       "100.29.160.0/24",
-      "100.30.168.0/24",
+      "100.30.89.0/24",
       "100.31.32.0/24",
       "100.42.181.0/24",
       "100.50.143.0/24",
       "100.50.208.0/24",
       "100.52.102.0/24",
-      "100.52.98.0/24",
       "100.55.135.0/24",
       "100.56.170.0/24",
-      "100.56.191.0/24",
+      "100.56.173.0/24",
       "100.57.182.0/24",
       "100.57.61.0/24",
       "100.58.87.0/24",
@@ -139,18 +137,15 @@
       "101.1.7.0/24",
       "101.100.203.0/24",
       "101.102.235.0/24",
-      "101.146.74.0/24",
       "101.167.164.0/24",
       "101.167.166.0/24",
       "101.188.47.0/24",
-      "101.207.251.0/24",
       "101.32.213.0/24",
       "101.33.46.0/24",
       "101.46.141.0/24",
       "101.50.1.0/24",
       "101.68.163.0/24",
       "101.99.75.0/24",
-      "101.99.76.0/24",
       "101.99.88.0/24",
       "101.99.92.0/22",
       "102.130.112.0/24",
@@ -180,12 +175,10 @@
       "102.221.188.0/22",
       "102.223.187.0/24",
       "102.227.162.0/24",
-      "102.39.102.0/24",
       "102.67.138.0/24",
       "102.68.97.0/24",
       "102.68.98.0/24",
       "103.10.78.0/24",
-      "103.101.85.0/24",
       "103.102.166.0/24",
       "103.102.234.0/24",
       "103.103.244.0/24",
@@ -194,40 +187,45 @@
       "103.108.220.0/24",
       "103.11.40.0/24",
       "103.11.43.0/24",
-      "103.110.85.0/24",
       "103.110.87.0/24",
       "103.112.173.0/24",
       "103.112.245.0/24",
       "103.112.62.0/24",
-      "103.112.69.0/24",
       "103.113.68.0/24",
       "103.115.48.0/24",
       "103.115.62.0/24",
       "103.115.64.0/24",
-      "103.116.47.0/24",
-      "103.117.122.0/24"
+      "103.117.122.0/24",
+      "103.117.148.0/24",
+      "103.117.180.0/24",
+      "103.118.208.0/24",
+      "103.118.240.0/23",
+      "103.118.254.0/24",
+      "103.119.0.0/24",
+      "103.119.216.0/23",
+      "103.119.219.0/24",
+      "103.12.154.0/24",
+      "103.120.134.0/24"
     ],
     "domain_files": [
-      "public/data/vpn_tunnel_domains_part1.txt"
+      "vpn_tunnel_domains_part1.txt"
     ],
     "bat_files": [
-      "public/data/amnezia_routes_part1.bat",
-      "public/data/amnezia_routes_part2.bat",
-      "public/data/amnezia_routes_part3.bat",
-      "public/data/amnezia_routes_part4.bat",
-      "public/data/amnezia_routes_part5.bat",
-      "public/data/amnezia_routes_part6.bat",
-      "public/data/amnezia_routes_part7.bat",
-      "public/data/amnezia_routes_part8.bat",
-      "public/data/amnezia_routes_part9.bat",
-      "public/data/amnezia_routes_part10.bat",
-      "public/data/amnezia_routes_part11.bat",
-      "public/data/amnezia_routes_part12.bat",
-      "public/data/amnezia_routes_part13.bat",
-      "public/data/amnezia_routes_part14.bat",
-      "public/data/amnezia_routes_part15.bat",
-      "public/data/amnezia_routes_part16.bat",
-      "public/data/amnezia_routes_part17.bat"
+      "amnezia_routes_part1.bat",
+      "amnezia_routes_part2.bat",
+      "amnezia_routes_part3.bat",
+      "amnezia_routes_part4.bat",
+      "amnezia_routes_part5.bat",
+      "amnezia_routes_part6.bat",
+      "amnezia_routes_part7.bat",
+      "amnezia_routes_part8.bat",
+      "amnezia_routes_part9.bat",
+      "amnezia_routes_part10.bat",
+      "amnezia_routes_part11.bat",
+      "amnezia_routes_part12.bat",
+      "amnezia_routes_part13.bat",
+      "amnezia_routes_part14.bat",
+      "amnezia_routes_part15.bat"
     ]
   }
 }

@@ -1,12 +1,16 @@
-name: Auto Update Keenetic Routes (14 Days)
+name: update-routes
 
 on:
   schedule:
-    - cron: '0 0 */14 * *'
+    - cron: '0 3 */14 * *'
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: update-routes-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   update-routes:
@@ -14,25 +18,48 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
-      - name: Run route update script
+      - name: Generate route lists
         run: python update_routes.py
 
       - name: Commit and push updated routes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f public/data/
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add public/data/
           if git diff --staged --quiet; then
-            echo "No changes in route data to commit."
-          else
-            git commit -m "auto: update route lists and metadata [cron 14d]"
-            git pull --rebase origin main
-            git push origin main
+            echo "No route changes to commit."
+            exit 0
           fi
+
+          git commit -m "auto: update route lists and metadata [cron 14d]"
+
+          for attempt in 1 2 3; do
+            if git push origin main; then
+              echo "Pushed successfully."
+              exit 0
+            fi
+            echo "Push rejected on attempt $attempt, syncing with origin/main and regenerating..."
+            git reset --hard origin/main
+            python update_routes.py
+            git add public/data/
+            if git diff --staged --quiet; then
+              echo "No changes after sync."
+              exit 0
+            fi
+            git commit -m "auto: update route lists and metadata [cron 14d]"
+          done
+
+          echo "Failed to push after 3 attempts."
+          exit 1
+

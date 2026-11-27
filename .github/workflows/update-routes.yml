@@ -1,4 +1,4 @@
-name: update-routes
+name: Auto Update Keenetic Routes (14 Days)
 
 on:
   schedule:
